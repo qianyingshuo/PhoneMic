@@ -1,0 +1,69 @@
+PhoneMic – Third-Party Dependency Notice
+
+This software (PhoneMic) is open-sourced under the Apache 2.0 License (see LICENSE file), and includes the following third-party components, with thanks:
+
+1. PySide6 (Qt for Python)
+   License: LGPL v3
+   Homepage: https://www.qt.io/qt-for-python
+   Note: Dynamically linked; related source code can be obtained from https://www.qt.io/offline-installers
+
+2. FastAPI
+   License: MIT
+   Homepage: https://fastapi.tiangolo.com
+
+3. Uvicorn
+   License: BSD 3-Clause
+   Homepage: https://www.uvicorn.org
+
+4. PyWin32
+   License: PSF (Python Software Foundation) License
+   Homepage: https://github.com/mhammond/pywin32
+
+5. PyAutoGUI
+   License: BSD 3-Clause
+   Homepage: https://github.com/asweigart/pyautogui
+
+6. Pyperclip
+   License: BSD 3-Clause
+   Homepage: https://github.com/asweigart/pyperclip
+
+7. netifaces
+   License: MIT
+   Homepage: https://github.com/al45tair/netifaces
+
+8. psutil
+   License: BSD 3-Clause
+   Homepage: https://github.com/giampaolo/psutil
+
+9. Jinja2
+   License: BSD 3-Clause
+   Homepage: https://jinja.palletsprojects.com
+
+10. keyboard
+    License: MIT
+    Homepage: https://github.com/boppreh/keyboard
+
+11. qrcode
+    License: BSD 3-Clause
+    Homepage: https://github.com/lincolnloop/python-qrcode
+
+12. Pillow
+    License: MIT (Historical Permission Notice and Disclaimer - HPND)
+    Homepage: https://python-pillow.org
+
+13. requests
+    License: Apache 2.0
+    Homepage: https://requests.readthedocs.io
+
+14. Nuitka (used only for packaging, not included in final distribution)
+    License: Apache 2.0
+    Homepage: https://nuitka.net
+
+--------------------------------------------------------------------
+Additional Note on the LGPL License:
+
+This software dynamically links PySide6 (Qt for Python) and follows the LGPL v3 license.
+You have the right to replace any files in the pyside6/ and shiboken6/ folders within this software's directory, and may obtain the complete source code of Qt from https://www.qt.io/offline-installers.
+
+For more information, please see the accompanying LICENSE.LGPL.txt file.
+--------------------------------------------------------------------

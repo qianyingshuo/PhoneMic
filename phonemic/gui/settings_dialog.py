@@ -1,0 +1,154 @@
+"""
+设置对话框 - 通用配置
+支持窗口水平拉伸，便于后续扩展复杂配置（如动作映射表）
+支持国际化（I18n）
+"""
+import logging
+
+from PySide6.QtWidgets import (
+    QDialog, QVBoxLayout, QFormLayout,
+    QGroupBox, QSpinBox, QComboBox, QCheckBox,
+    QDialogButtonBox, QScrollArea, QWidget, QMessageBox
+)
+
+from phonemic.utils.settings_manager import SettingsManager
+from phonemic.utils.i18n import I18n  # 国际化单例
+from phonemic.utils import i18n  # 国际化单例
+
+logger = logging.getLogger(__name__)
+
+class SettingsDialog(QDialog):
+    """应用设置对话框（可调整宽度）"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.sm = SettingsManager.instance()
+        self.i18n = I18n.instance()
+
+        self.setWindowTitle(self.i18n.tr("settings.title"))
+        self.setModal(True)
+
+        # 允许窗口自由调整大小，但限制最小尺寸
+        self.setMinimumWidth(400)
+        self.resize(500, 600)
+
+        self._setup_ui()
+        self._load_settings()
+        self.accepted.connect(self._save_settings)
+
+    def _setup_ui(self):
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(12, 12, 12, 12)
+        main_layout.setSpacing(12)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.NoFrame)
+        main_layout.addWidget(scroll)
+
+        content_widget = QWidget()
+        scroll.setWidget(content_widget)
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setSpacing(16)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+
+        content_layout.addWidget(self._create_hud_group())
+        content_layout.addWidget(self._create_chat_group())
+        content_layout.addWidget(self._create_other_group())
+        content_layout.addStretch()
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        main_layout.addWidget(self.button_box)
+
+    @staticmethod
+    def set_combo_index(combo, data):
+        index = combo.findData(data)
+        if index >= 0:
+            combo.setCurrentIndex(index)
+        else:
+            combo.setCurrentIndex(0)
+
+    def _create_hud_group(self):
+        group = QGroupBox(self.i18n.tr("settings.hud_group"))
+        layout = QFormLayout(group)
+        layout.setSpacing(12)
+        layout.setContentsMargins(12, 16, 12, 12)
+
+        self.timeout_spin = QSpinBox()
+        self.timeout_spin.setRange(1, 30)
+        self.timeout_spin.setSuffix(self.i18n.tr("settings.seconds_suffix"))
+        self.timeout_spin.setToolTip(self.i18n.tr("settings.hud_timeout_tooltip"))
+        layout.addRow(self.i18n.tr("settings.hud_timeout") + ":", self.timeout_spin)
+
+        self.font_combo = QComboBox()
+        self.font_combo.addItem(self.i18n.tr("settings.font_follow_system"), "system")
+        for size in [12, 14, 16, 18, 20, 22, 24]:
+            self.font_combo.addItem(str(size), size)
+        self.font_combo.setToolTip(self.i18n.tr("settings.font_size_tooltip"))
+        layout.addRow(self.i18n.tr("settings.hud_font_size") + ":", self.font_combo)
+
+        return group
+
+    def _create_chat_group(self):
+        group = QGroupBox(self.i18n.tr("settings.chat_group"))
+        layout = QFormLayout(group)
+        layout.setSpacing(12)
+        layout.setContentsMargins(12, 16, 12, 12)
+
+        self.max_records_spin = QSpinBox()
+        self.max_records_spin.setRange(5, 50)
+        self.max_records_spin.setSuffix(self.i18n.tr("settings.records_suffix"))
+        self.max_records_spin.setToolTip(self.i18n.tr("settings.max_records_tooltip"))
+        layout.addRow(self.i18n.tr("settings.max_records") + ":", self.max_records_spin)
+
+        return group
+
+    def _create_other_group(self):
+        group = QGroupBox(self.i18n.tr("settings.other_group"))
+        layout = QFormLayout(group)
+        layout.setSpacing(12)
+        layout.setContentsMargins(12, 16, 12, 12)
+
+        self.lang_combo = QComboBox()
+        self.lang_combo.clear()
+        languages = i18n.get_available_languages()
+        for code, display in languages:
+            self.lang_combo.addItem(display, code)
+        layout.addRow(self.i18n.tr("settings.language") + ":", self.lang_combo)
+
+        return group
+
+    def _load_settings(self):
+        self.timeout_spin.setValue(self.sm.get("hud_timeout_sec", 5))
+
+        font_val = self.sm.get("hud_font_size", 14)
+        self.set_combo_index(self.font_combo, font_val)
+
+        self.max_records_spin.setValue(self.sm.get("mobile_max_records", 10))
+
+        lang = self.sm.get("language", "zh_CN")
+        self.set_combo_index(self.lang_combo, lang)
+
+    def _save_settings(self):
+
+        self.sm.set("hud_timeout_sec", self.timeout_spin.value())
+
+        selected_data = self.font_combo.currentData()
+        if selected_data == "system":
+            self.sm.set("hud_font_size", "system")
+        else:
+            self.sm.set("hud_font_size", selected_data)
+
+        self.sm.set("mobile_max_records", self.max_records_spin.value())
+
+        old_lang = self.sm.get("language", "zh_CN")
+        new_lang = self.lang_combo.currentData()
+        if old_lang != new_lang:
+            self.sm.set("language", new_lang)
+            QMessageBox.information(
+                self,
+                self.i18n.tr("settings.restart_title"),
+                self.i18n.tr("settings.restart_message")
+            )
