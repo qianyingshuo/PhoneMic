@@ -121,7 +121,9 @@ class Dashboard(QMainWindow):
         if guide_path.exists():
             # 用系统默认程序打开md文件
             if sys.platform == "win32":
-                subprocess.run(["notepad.exe", str(guide_path)])
+                subprocess.Popen(["notepad.exe", str(guide_path)], 
+                                 shell=False, 
+                                 creationflags=subprocess.CREATE_NO_WINDOW)
                 #os.startfile(str(guide_path))
             else:
                 subprocess.run(["open", str(guide_path)] if sys.platform == "darwin" else ["xdg-open", str(guide_path)])
