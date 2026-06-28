@@ -104,7 +104,7 @@ def run_nuitka(onefile: bool, version: str, commit: str):
         sys.executable, "-m", "nuitka",
         "--onefile" if onefile else "--standalone",
         "--windows-console-mode=disable",
-        "--accept-downloads",
+        "--assume-yes-for-downloads",
         f"--windows-icon-from-ico={ICON_PATH}",
         f"--output-dir={BUILD_DIR}",
         "--lto=yes",
