@@ -20,7 +20,7 @@
 
 **Purpose**: 准备测试基础框架和环境
 
-- [ ] T001 配置基础测试环境并在 tests/ 目录下准备新建的单元测试文件 tests/test_dashboard_tray.py
+- [x] T001 配置基础测试环境并在 tests/ 目录下准备新建的单元测试文件 tests/test_dashboard_tray.py
 
 ---
 
@@ -28,7 +28,7 @@
 
 **Purpose**: 准备跨平台与宿主机验证环境
 
-- [ ] T002 确认宿主机 GUI 自动化验证脚本已同步至共享挂载路径下 /mnt/s/WSL/wsl_windows_test/test_windows_host_gui.py
+- [x] T002 确认宿主机 GUI 自动化验证脚本已同步至共享挂载路径下 /mnt/s/WSL/wsl_windows_test/test_windows_host_gui.py
 
 ---
 
@@ -40,7 +40,7 @@
 
 ### Implementation for User Story 4
 
-- [ ] T003 [US4] 验证宿主机测试脚本 tests/test_windows_host_gui.py 在修改主程序前能正常执行并拦截报错
+- [x] T003 [US4] 验证宿主机测试脚本 tests/test_windows_host_gui.py 在修改主程序前能正常执行并拦截报错
 
 ---
 
@@ -51,11 +51,11 @@
 **Independent Test**: 运行单元测试断言，以及实机上最小化后任务栏为0。
 
 ### Tests for User Story 1 (MANDATORY - TDD Phase) ⚠️
-- [ ] T004 [P] [US1] 在 tests/test_dashboard_tray.py 中编写最小化隐藏的 Failing 单元测试（断言 isHidden 状态和 WindowNoState）
+- [x] T004 [P] [US1] 在 tests/test_dashboard_tray.py 中编写最小化隐藏的 Failing 单元测试（断言 isHidden 状态和 WindowNoState）
 
 ### Implementation for User Story 1
-- [ ] T005 [US1] 在 phonemic/gui/dashboard.py 中重写 changeEvent 并实现 isMinimized 状态下的隐藏和状态清除
-- [ ] T006 [US1] 运行 pytest 单元测试命令 poetry run pytest tests/test_dashboard_tray.py -k test_minimize 确保测试全绿通过
+- [x] T005 [US1] 在 phonemic/gui/dashboard.py 中重写 changeEvent 并实现 isMinimized 状态下的隐藏和状态清除
+- [x] T006 [US1] 运行 pytest 单元测试命令 poetry run pytest tests/test_dashboard_tray.py -k test_minimize 确保测试全绿通过
 
 ---
 
@@ -66,11 +66,11 @@
 **Independent Test**: 单元测试中关闭事件被 ignore，且窗口可见性变为隐藏。
 
 ### Tests for User Story 2 (MANDATORY - TDD Phase) ⚠️
-- [ ] T007 [P] [US2] 在 tests/test_dashboard_tray.py 中编写关闭拦截的 Failing 单元测试（断言关闭事件被 ignore 且窗口隐藏）
+- [x] T007 [P] [US2] 在 tests/test_dashboard_tray.py 中编写关闭拦截的 Failing 单元测试（断言关闭事件被 ignore 且窗口隐藏）
 
 ### Implementation for User Story 2
-- [ ] T008 [US2] 在 phonemic/gui/dashboard.py 中重写 closeEvent 并引入 _force_quit = False 标志，实现非强制退出的隐藏逻辑
-- [ ] T009 [US2] 运行 pytest 单元测试命令 poetry run pytest tests/test_dashboard_tray.py -k test_close 确保测试全绿通过
+- [x] T008 [US2] 在 phonemic/gui/dashboard.py 中重写 closeEvent 并引入 _force_quit = False 标志，实现非强制退出的隐藏逻辑
+- [x] T009 [US2] 运行 pytest 单元测试命令 poetry run pytest tests/test_dashboard_tray.py -k test_close 确保测试全绿通过
 
 ---
 
@@ -81,11 +81,11 @@
 **Independent Test**: 单元测试中在 _force_quit 开启时，关闭事件被 accept，进程顺利结束。
 
 ### Tests for User Story 3 (MANDATORY - TDD Phase) ⚠️
-- [ ] T010 [P] [US3] 在 tests/test_dashboard_tray.py 中编写托盘彻底退出的 Failing 单元测试（断言开启强制退出标志后 closeEvent 被 accept）
+- [x] T010 [P] [US3] 在 tests/test_dashboard_tray.py 中编写托盘彻底退出的 Failing 单元测试（断言开启强制退出标志后 closeEvent 被 accept）
 
 ### Implementation for User Story 3
-- [ ] T011 [US3] 在 phonemic/gui/tray.py 中新增 quit_application 槽函数，在退出前将 dashboard._force_quit 置为 True 并绑定托盘退出菜单
-- [ ] T012 [US3] 运行 pytest 单元测试命令 poetry run pytest tests/test_dashboard_tray.py -k test_force_quit 确保测试全绿通过
+- [x] T011 [US3] 在 phonemic/gui/tray.py 中新增 quit_application 槽函数，在退出前将 dashboard._force_quit 置为 True 并绑定托盘退出菜单
+- [x] T012 [US3] 运行 pytest 单元测试命令 poetry run pytest tests/test_dashboard_tray.py -k test_force_quit 确保测试全绿通过
 
 ---
 
@@ -94,7 +94,7 @@
 **Purpose**: 进行实机回归测试与交付报告生成
 
 - [ ] T013 运行宿主机 GUI 自动化验证脚本 tests/test_windows_host_gui.py 进行 Windows 实机回归并确保测试全绿
-- [ ] T014 按照 specs/001-minimize-to-tray/quickstart.md 校验并输出 specs/001-minimize-to-tray/walkthrough.md 交付报告
+- [x] T014 按照 specs/001-minimize-to-tray/quickstart.md 校验并输出 specs/001-minimize-to-tray/walkthrough.md 交付报告
 
 ---
 
