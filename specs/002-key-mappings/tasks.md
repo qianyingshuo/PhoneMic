@@ -83,13 +83,12 @@
 ---
 
 ## Phase 5: Polish & Cross-Cutting Concerns
- 
-**Purpose**: 界面优化、追踪日志审计完善、国际化语言补充及端到端交付验证。
- 
-- [ ] T015 [P] 依据项目宪法中的层级全链路追踪规范 (UOP/HTP 1.1)，为 WebSocket 建立连接及按键模拟执行处理分别增加 conn 和 sim 追踪上下文日志，位于 phonemic/server/api.py 和 phonemic/PhoneMic.py (GREEN)
-- [ ] T016 [P] 补全按键映射管理界面、提示、警示通知在多语言模式下所需的中英文词条翻译，位于 phonemic/resources/locales/zh_CN.json 和 en_US.json (GREEN)
-- [ ] T017 [P] 更新项目用户指南文档，补充“手机端左侧抽屉设置及发送追加按键映射”的说明，位于 USER_GUIDE.md (GREEN)
-- [ ] T018 运行 specs/002-key-mappings/quickstart.md 快速验证指南下的四个测试场景以确保通过，生成 specs/002-key-mappings/walkthrough.md 并进行 Git 本地提交 (GREEN)
+
+**Purpose**: 界面优化、国际化语言完善、文档规范更新及端到端交付验证。
+
+- [ ] T015 [P] 补全按键映射管理界面、提示、警示通知在多语言模式下所需的中英文词条翻译，位于 phonemic/resources/locales/zh_CN.json 和 en_US.json
+- [ ] T016 [P] 更新项目用户指南文档，补充“手机端左侧抽屉设置及发送追加按键映射”的说明，位于 USER_GUIDE.md
+- [ ] T017 运行 specs/002-key-mappings/quickstart.md 快速验证指南下的四个测试场景以确保通过，生成 specs/002-key-mappings/walkthrough.md 并进行 Git 本地提交
 
 ---
 
