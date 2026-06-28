@@ -12,6 +12,18 @@ PhoneMic 统一构建脚本
 
 import subprocess
 import sys
+# 强制设置标准输出和错误输出为 UTF-8 编码，防止在部分非 UTF-8 的 Windows 控制台下输出中文崩溃
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+if hasattr(sys.stderr, 'reconfigure'):
+    try:
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 import argparse
 import shutil
 from datetime import datetime
