@@ -49,7 +49,11 @@ def extract_cwd_from_command_str(command_str: str) -> Tuple[str, Optional[Path]]
             path_str = path_str[1:-1]
         try:
             expanded = os.path.expandvars(path_str)
-            cwd_path = Path(expanded).expanduser().resolve()
+            # 如果是 Windows 盘符开头的绝对路径，在 Linux 下 resolve 会拼上当前工作目录，因此这里跳过 resolve
+            if re.match(r'^[a-zA-Z]:', expanded):
+                cwd_path = Path(expanded)
+            else:
+                cwd_path = Path(expanded).expanduser().resolve()
             remaining = command_str[m.end():].lstrip()
             return remaining, cwd_path
         except Exception as e:

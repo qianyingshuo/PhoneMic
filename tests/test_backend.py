@@ -127,7 +127,7 @@ def test_real_server_with_websocket_client():
     set_bridge(bridge)
     queue = bridge.queue
     host = "127.0.0.1"
-    port = 8888  # 使用临时端口避免冲突
+    port = 38888  # 使用临时端口避免冲突
 
     # 在独立线程中启动服务
     def run():
@@ -175,7 +175,7 @@ def test_real_server_with_websocket_client():
 def test_server_start_stop():
     """验证 start_server / stop_server 能正常启停且释放端口"""
     host = "127.0.0.1"
-    port = 8889  # 临时端口，避免冲突
+    port = 38889  # 临时端口，避免冲突
     bridge = QueueEventBridge(multiprocessing.Queue())
 
     # 启动服务器

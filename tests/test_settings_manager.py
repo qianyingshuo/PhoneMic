@@ -54,8 +54,9 @@ def test_singleton(reset_singleton):
     assert sm1 is sm2
 
 
-def test_load_default_config_when_file_missing(mock_config_path, reset_singleton):
+def test_load_default_config_when_file_missing(mock_config_path, reset_singleton, monkeypatch):
     """配置文件不存在时，自动创建默认配置"""
+    monkeypatch.setattr("phonemic.utils.system_lang.detect_system_language", lambda: "zh_CN")
     sm = SettingsManager.instance()
     config_file = mock_config_path / "settings.json"
     assert config_file.exists()

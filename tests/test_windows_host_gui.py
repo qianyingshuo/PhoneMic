@@ -13,10 +13,22 @@ Windows 宿主机自动化 GUI 测试验证脚本
 import sys
 import time
 
+if sys.platform != 'win32':
+    try:
+        import pytest
+        pytest.skip("Windows only test", allow_module_level=True)
+    except ImportError:
+        pass
+
 try:
     import win32gui
     import win32con
 except ImportError:
+    try:
+        import pytest
+        pytest.skip("win32gui not available, skipping", allow_module_level=True)
+    except ImportError:
+        pass
     print("错误：未检测到 pywin32 依赖，请在宿主机执行: pip install pywin32")
     sys.exit(1)
 

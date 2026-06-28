@@ -22,7 +22,7 @@
 
 **Purpose**: 初始化开发环境和文件骨架
 
-- [ ] T001 确认按键映射配置与功能所需的基础文件路径与模块声明符合 specs/002-key-mappings/plan.md 规范
+- [X] T001 确认按键映射配置与功能所需的基础文件路径与模块声明符合 specs/002-key-mappings/plan.md 规范
 
 ---
 
@@ -32,8 +32,8 @@
 
 **⚠️ CRITICAL**: 在本阶段完成前，不得开始任何用户故事的开发
 
-- [ ] T002 编写单元测试用例以验证按键映射管理器的 CRUD、默认值注入和配置合法性，位于 tests/test_key_mappings.py (RED)
-- [ ] T003 实现按键映射管理器 KeyMappingsManager，负责 settings.json 中 key_mappings 列表的数据维护，位于 phonemic/utils/key_mappings_manager.py (GREEN)
+- [X] T002 编写单元测试用例以验证按键映射管理器的 CRUD、默认值注入和配置合法性，位于 tests/test_key_mappings.py (RED)
+- [X] T003 实现按键映射管理器 KeyMappingsManager，负责 settings.json 中 key_mappings 列表的数据维护，位于 phonemic/utils/key_mappings_manager.py (GREEN)
 
 **Checkpoint**: 基础模型与数据管理器准备就绪——用户故事开发可以正式开始。
 
