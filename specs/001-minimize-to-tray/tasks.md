@@ -93,7 +93,7 @@
 
 **Purpose**: 进行实机回归测试与交付报告生成
 
-- [ ] T013 运行宿主机 GUI 自动化验证脚本 tests/test_windows_host_gui.py 进行 Windows 实机回归并确保测试全绿
+- [x] T013 运行宿主机 GUI 自动化验证脚本 tests/test_windows_host_gui.py 进行 Windows 实机回归并确保测试全绿
 - [x] T014 按照 specs/001-minimize-to-tray/quickstart.md 校验并输出 specs/001-minimize-to-tray/walkthrough.md 交付报告
 
 ---
