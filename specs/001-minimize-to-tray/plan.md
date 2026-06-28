@@ -6,17 +6,17 @@
 
 ## Summary
 
-实现 PhoneMic 电脑端主窗口点击右上角关闭 (X) 和最小化按钮时，将其隐藏至系统托盘（不再占用任务栏与 Alt+Tab 切窗列表），同时确保通过系统托盘的右键菜单“退出”可以真正并且安全地退出进程与释放端口。
+实现 PhoneMic 电脑端主窗口点击右上角关闭 (X) 和最小化按钮时，将其隐藏至系统托盘（不再占用任务栏与 Alt+Tab 切窗列表），同时确保通过系统托盘的右键菜单“退出”可以真正并且安全地退出进程与释放端口。此外，在工程共享目录中提供一个可在 Windows 宿主机运行的自动化 GUI 验证脚本，用于低成本实机断言窗口的隐藏和存活状态。
 
 ## Technical Context
 
 **Language/Version**: Python >= 3.10, < 3.15
 
-**Primary Dependencies**: PySide6 (>=6.11.1)
+**Primary Dependencies**: PySide6 (>=6.11.1), `pywin32` (仅限 Windows 验证脚本端使用)
 
 **Storage**: N/A
 
-**Testing**: pytest, pytest-qt, pytest-mock
+**Testing**: pytest, pytest-qt, pytest-mock (WSL环境); pywin32 win32gui/win32con (Windows宿主机环境)
 
 **Target Platform**: Windows (编译与运行环境), Linux / WSL (TDD 单元测试执行环境)
 
@@ -25,6 +25,7 @@
 **Performance Goals**: 
 - 从隐藏状态唤醒显示主窗口响应延迟 < 0.5 秒。
 - 从系统托盘菜单彻底退出程序、关闭后台 FastAPI 服务并释放网络端口时长 < 2.0 秒。
+- 宿主机端自动化 GUI 验证脚本整体运行断言耗时 < 10.0 秒。
 
 **Constraints**:
 - 不引入外部配置文件读写和多语言文本定义。
@@ -32,7 +33,10 @@
 
 **Scale/Scope**: 
 - 修改 2 个源文件（`dashboard.py` 与 `tray.py`）。
-- 新增 1 个测试文件（`test_dashboard_tray.py`）包含至少 3 个测试用例，覆盖最小化隐藏、关闭拦截及强制退出。
+- 新增 1 个 WSL 单元测试文件（`test_dashboard_tray.py`）覆盖最小化隐藏、关闭拦截及强制退出。
+- 新增 1 个 Windows 自动化 GUI 测试验证脚本，并在项目和 Windows 宿主机的共享目录中同时输出：
+  * 项目路径：`tests/test_windows_host_gui.py`
+  * 宿主机共享路径：`/mnt/s/WSL/wsl_windows_test/test_windows_host_gui.py`
 
 ---
 
@@ -41,11 +45,11 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **原则 I. 核心逻辑解耦与 API-First**: 
-  - *评估结果*：**PASS**。修改纯粹在 GUI 层的窗口事件管理器（`closeEvent` / `changeEvent`）内进行，后台的 FastAPI WebSocket 服务仍然与 GUI 窗口解耦，两者的并发通信模式保持不变。
+  - *评估结果*：**PASS**。修改纯粹在 GUI 层的窗口事件管理器（`closeEvent` / `changeEvent`）内进行，后台的 FastAPI WebSocket 服务仍然与 GUI 窗口解耦。
 - **原则 II. 平台差异抽象与可打桩设计 (Mockability)**:
   - *评估结果*：**PASS**。由于在 WSL 无 UI 虚拟机环境执行测试，针对托盘图标退出和 MessageBox 等组件，我们使用 `pytest` 提供的打桩和 mock 工具，断言状态变更逻辑而无需在 Linux 上渲染真正的系统托盘和托盘菜单。
 - **原则 III. 测试驱动开发 (TDD 铁律)**:
-  - *评估结果*：**PASS**。严格遵循 TDD。在编写任何生产代码前，先创建包含失败用例的测试文件，再实现逻辑使其通过，并在重构期保证测试全绿。
+  - *评估结果*：**PASS**。严格遵循 TDD。在编写任何生产代码前，先创建包含失败用例的测试文件。
 
 ---
 
@@ -72,7 +76,8 @@ phonemic/
     └── tray.py          # 目标修改：修改退出项为绑定自定义退出函数以设置 _force_quit=True
 
 tests/
-└── test_dashboard_tray.py # 新增测试文件：编写失败测试并驱动功能开发
+├── test_dashboard_tray.py  # 新增 WSL 测试文件：编写失败测试并驱动功能开发
+└── test_windows_host_gui.py # 新增 Windows 自动化验证脚本
 ```
 
-**Structure Decision**: 采用标准的 Single Project（单项目单测试模块）结构。在修改 `dashboard.py` 与 `tray.py` 的同时，新增 `tests/test_dashboard_tray.py` 自动化测试脚本驱动开发。
+**Structure Decision**: 采用标准的 Single Project（单项目单测试模块）结构。在修改 `dashboard.py` 与 `tray.py` 的同时，新增 `tests/test_dashboard_tray.py` 自动化测试脚本驱动开发。此外，在 Windows 共享目录下输出 `test_windows_host_gui.py` 供宿主机直接运行。
