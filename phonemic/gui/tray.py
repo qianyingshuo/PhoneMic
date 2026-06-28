@@ -105,6 +105,11 @@ class SystemTray(QObject):
         dlg = CommandsDialog(self)
         dlg.exec_()
 
+    def quit_application(self):
+        if self.dashboard:
+            self.dashboard._force_quit = True
+        QApplication.quit()
+
     def _create_tray_menu(self):
         menu = QMenu()
         menu.addAction(self.i18n.tr("tray.menu_show")).triggered.connect(self.show_main_window)
@@ -113,5 +118,5 @@ class SystemTray(QObject):
         menu.addAction(self.i18n.tr("dashboard.menu_command")).triggered.connect(self._open_commands_dialog)
         menu.addSeparator()
         menu.addAction(self.i18n.tr("tray.menu_about")).triggered.connect(self.dashboard.show_about)
-        menu.addAction(self.i18n.tr("tray.menu_quit")).triggered.connect(lambda: QApplication.quit())
+        menu.addAction(self.i18n.tr("tray.menu_quit")).triggered.connect(self.quit_application)
         return menu

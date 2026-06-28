@@ -8,6 +8,7 @@
 from unittest.mock import MagicMock
 import pytest
 from PySide6.QtCore import Qt, QEvent
+from PySide6.QtGui import QWindowStateChangeEvent
 from PySide6.QtWidgets import QApplication
 
 from phonemic.gui.dashboard import Dashboard
@@ -37,12 +38,13 @@ def test_minimize_hide(qapp, qtbot):
     qtbot.addWidget(dashboard)
     dashboard.show()
 
-    # 模拟触发最小化动作
-    dashboard.showMinimized()
+    # 模拟物理最小化状态并分发状态改变事件以触发 changeEvent
+    dashboard.setWindowState(Qt.WindowMinimized)
+    event = QWindowStateChangeEvent(Qt.WindowNoState)
+    QApplication.sendEvent(dashboard, event)
 
-    # 未修改前，此断言必失败（因为窗口未调用 hide，只处于 minimized 状态）
+    # 期待的结果是：窗口已隐藏，且其 windowState 回到 Normal
     assert dashboard.isHidden() is True
-    # 且其 windowState 状态应该被重置为正常
     assert dashboard.windowState() == Qt.WindowNoState
 
 

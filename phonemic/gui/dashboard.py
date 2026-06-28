@@ -5,7 +5,7 @@ import sys
 
 import qrcode
 from PIL.ImageQt import ImageQt
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QLabel,
@@ -21,9 +21,10 @@ class Dashboard(QMainWindow):
     def __init__(self, ip: str, port: int, parent=None):
         super().__init__(parent)
         self.i18n = I18n.instance()
-        self.setWindowTitle(self.i18n.tr("dashboard.title"))
+        self.setWindowTitle(self.i18n.tr("dashboard.title") + " (Dev)")
         self.setFixedSize(400, 450)
         self.setWindowFlags(self.windowFlags() & (~Qt.WindowMaximizeButtonHint) | Qt.WindowCloseButtonHint)
+        self._force_quit = False
         self._setup_ui(ip, port)
         self._setup_menu()
 
@@ -138,3 +139,19 @@ class Dashboard(QMainWindow):
             self.status_label.setText('<span style="color:green;">●</span> ' + self.i18n.tr("dashboard.status_connected"))
         else:
             self.status_label.setText('<span style="color:red;">●</span> ' + self.i18n.tr("dashboard.status_disconnected"))
+
+    def closeEvent(self, event):
+        if getattr(self, "_force_quit", False):
+            event.accept()
+        else:
+            self.hide()
+            event.ignore()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.WindowStateChange:
+            if self.isMinimized():
+                self.hide()
+                self.setWindowState(Qt.WindowNoState)
+                event.ignore()
+                return
+        super().changeEvent(event)
