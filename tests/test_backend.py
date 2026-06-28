@@ -205,3 +205,17 @@ def test_server_start_stop():
     with pytest.raises(requests.ConnectionError):
         requests.get(url, timeout=1.0)
 
+
+def test_mobile_html_websocket_protocol_adaptation():
+    """mobile.html 中的 WebSocket 客户端应当能够自适应安全与非安全连接协议"""
+    from phonemic.utils.paths import get_app_root
+    mobile_html_path = get_app_root() / "phonemic" / "resources" / "mobile.html"
+    assert mobile_html_path.exists(), "mobile.html 模板文件必须存在"
+    
+    with open(mobile_html_path, "r", encoding="utf-8") as f:
+        content = f.read()
+        
+    # 断言包含自适应安全连接协议的逻辑
+    assert "window.location.protocol === 'https:' ? 'wss:' : 'ws:'" in content
+
+

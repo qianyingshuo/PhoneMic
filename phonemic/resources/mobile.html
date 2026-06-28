@@ -726,7 +726,8 @@
         const modeToggle = document.getElementById('mode-toggle');
 
         const chatManager = new ChatListManager(chatContainer, appConfig);
-        const wsClient = new WSClient(`ws://${window.location.host}/ws`, appConfig);
+        const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsClient = new WSClient(`${wsProto}//${window.location.host}/ws`, appConfig);
         const uiController = new UIController(inputBox, btnSend, btnClear, modeToggle, chatManager, wsClient, appConfig);
         
         new MessageInteractionManager(chatContainer, uiController, wsClient);
