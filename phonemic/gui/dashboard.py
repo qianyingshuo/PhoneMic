@@ -76,6 +76,10 @@ class Dashboard(QMainWindow):
         layout.addWidget(self.status_label)
         layout.addStretch()
 
+    def _tr(self, key: str, default: str) -> str:
+        val = self.i18n.tr(key)
+        return default if val == key else val
+
     def _setup_menu(self):
         menubar = self.menuBar()
         # 使用原生菜单栏，避免占用额外空间
@@ -88,6 +92,13 @@ class Dashboard(QMainWindow):
         settings_action = QAction(self.i18n.tr("dashboard.menu_action"), self)
         settings_action.triggered.connect(self._open_settings)
         settings_menu.addAction(settings_action)
+        
+        # 添加“按键映射”菜单
+        key_mappings_label = self._tr("dashboard.menu_key_mappings", "按键映射配置")
+        key_mappings_action = QAction(key_mappings_label, self)
+        key_mappings_action.triggered.connect(self._open_key_mappings_dialog)
+        settings_menu.addAction(key_mappings_action)
+
         # 添加“工具”菜单
         commands_action = QAction(self.i18n.tr("dashboard.menu_command"), self)
         commands_action.triggered.connect(self._open_commands_dialog)
@@ -104,6 +115,11 @@ class Dashboard(QMainWindow):
 
     def _open_settings(self):
         dialog = SettingsDialog(self)
+        dialog.exec()
+        
+    def _open_key_mappings_dialog(self):
+        from phonemic.gui.key_mappings_dialog import KeyMappingsDialog
+        dialog = KeyMappingsDialog(self)
         dialog.exec()
         
     def _open_commands_dialog(self):

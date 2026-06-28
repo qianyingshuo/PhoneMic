@@ -70,13 +70,13 @@
 
 ### Tests for User Story 2 (MANDATORY - TDD Phase) ⚠️
 
-- [ ] T011 [US2] 编写 KeyMappingsDialog 界面列表渲染、修改、删除槽函数触发及新增保存校验的测试用例，位于 tests/gui/test_key_mappings_dialog.py (RED)
+- [X] T011 [US2] 编写 KeyMappingsDialog 界面列表渲染、修改、删除槽函数触发及新增保存校验的测试用例，位于 tests/gui/test_key_mappings_dialog.py (RED)
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] 创建按键映射编辑对话框 KeyMappingEditDialog，实现按键合法性正则匹配验证、显示名称全局唯一（不重名）及最大 12 个字符宽度限制拦截，位于 phonemic/gui/key_mappings_dialog.py (GREEN)
-- [ ] T013 [US2] 创建按键映射列表展示及删除确认对话框 KeyMappingsDialog，支持保存并同步更新，位于 phonemic/gui/key_mappings_dialog.py (GREEN)
-- [ ] T014 [US2] 在主窗口菜单栏的“设置”项中新增动作，点击调起 KeyMappingsDialog 进行配置，位于 phonemic/gui/dashboard.py (GREEN)
+- [X] T012 [US2] 创建按键映射编辑对话框 KeyMappingEditDialog，实现按键合法性正则匹配验证、显示名称全局唯一（不重名）及最大 12 个字符宽度限制拦截，位于 phonemic/gui/key_mappings_dialog.py (GREEN)
+- [X] T013 [US2] 创建按键映射列表展示及删除确认对话框 KeyMappingsDialog，支持保存并同步更新，位于 phonemic/gui/key_mappings_dialog.py (GREEN)
+- [X] T014 [US2] 在主窗口菜单栏的“设置”项中新增动作，点击调起 KeyMappingsDialog 进行配置，位于 phonemic/gui/dashboard.py (GREEN)
 
 **Checkpoint**: 此时，User Stories 1 与 2 全数集成完毕。用户在多端均能对按键映射进行自如的管理与选用。
 
@@ -86,8 +86,8 @@
 
 **Purpose**: 界面优化、国际化语言完善、文档规范更新及端到端交付验证。
 
-- [ ] T015 [P] 补全按键映射管理界面、提示、警示通知在多语言模式下所需的中英文词条翻译，位于 phonemic/resources/locales/zh_CN.json 和 en_US.json
-- [ ] T016 [P] 更新项目用户指南文档，补充“手机端左侧抽屉设置及发送追加按键映射”的说明，位于 USER_GUIDE.md
+- [X] T015 [P] 补全按键映射管理界面、提示、警示通知在多语言模式下所需的中英文词条翻译，位于 phonemic/resources/locales/zh_CN.json 和 en_US.json
+- [X] T016 [P] 更新项目用户指南文档，补充“手机端左侧抽屉设置及发送追加按键映射”的说明，位于 USER_GUIDE.md
 - [ ] T017 运行 specs/002-key-mappings/quickstart.md 快速验证指南下的四个测试场景以确保通过，生成 specs/002-key-mappings/walkthrough.md 并进行 Git 本地提交
 
 ---

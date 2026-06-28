@@ -9,6 +9,7 @@
     "menu_settings" : "设置",
     "menu_action" : "偏好设置",
     "menu_command" : "命令配置",
+    "menu_key_mappings": "按键映射配置",
     "menu_help" : "帮助",
     "menu_help_guide" : "使用帮助",
     "menu_about" : "关于 PhoneMic"
@@ -70,7 +71,9 @@
     "log_ws_disconnected": "[WS] 断开",
     "log_ws_unknown_type": "[WS] 未处理的消息类型:",
     "log_ws_parse_error": "[WS] 解析消息失败",
-    "log_config_updated": "[Config] 更新 maxHistory = "
+    "log_config_updated": "[Config] 更新 maxHistory = ",
+    "drawer_title": "设置",
+    "label_key_mapping": "追加按键映射"
   },
   "commands": {
     "title": "命令管理",
@@ -123,5 +126,26 @@
     "error_name_empty": "名称不能为空",
     "error_pattern_empty": "匹配模式不能为空",
     "error_param_empty": "动作参数不能为空"
+  },
+  "common": {
+    "error": "错误",
+    "confirm": "确认"
+  },
+  "key_mappings": {
+    "dialog_title": "按键映射管理",
+    "edit_title_edit": "编辑按键映射",
+    "edit_title_add": "新增按键映射",
+    "label_name": "显示名称:",
+    "label_keys": "按键序列:",
+    "btn_save": "保存",
+    "btn_cancel": "取消",
+    "btn_add": "新增",
+    "btn_edit": "修改",
+    "btn_delete": "删除",
+    "btn_close": "关闭",
+    "err_name_len": "名称长度必须在 1-12 字符之间",
+    "err_name_exists": "该名称已存在",
+    "err_keys_invalid": "按键序列无效: {err}",
+    "confirm_delete": "确定要删除这条按键映射吗？"
   }
 }
