@@ -1,6 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+shell commands, and other important information, read the current plan:
+[specs/001-minimize-to-tray/plan.md](file:///home/coding/workspace/PhoneMic/specs/001-minimize-to-tray/plan.md)
 <!-- SPECKIT END -->
 
 > [!NOTE]
