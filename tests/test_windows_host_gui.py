@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 Windows 宿主机自动化 GUI 测试验证脚本
-用于检测 PhoneMic 在 Windows 下的最小化隐藏与关闭拦截逻辑是否按预期工作。
+用于检测 PhoneMic 开发版在 Windows 下的最小化隐藏与关闭拦截逻辑是否按预期工作。
+本脚本专门寻找标题带有 (Dev) 后缀的窗口，以防与您正常运行的 PhoneMic 生产程序冲突。
 前提条件：
 1. 宿主机已安装 Python 3.x
 2. 宿主机已安装 pywin32 库：pip install pywin32
-3. PhoneMic 程序已经在 Windows 宿主机上正常启动并显示主界面。
+3. PhoneMic 独立开发测试版程序已经在 Windows 宿主机上正常启动。
 """
 
 import sys
@@ -22,19 +23,25 @@ except ImportError:
 
 def test_windows_gui():
     print("=" * 60)
-    print("           PhoneMic Windows 宿主机 GUI 自动化验证脚本           ")
+    print("      PhoneMic Windows 宿主机 GUI 自动化验证脚本 (Dev版)       ")
     print("=" * 60)
 
-    # 1. 查找窗口句柄
-    title = "PhoneMic - 主界面"
-    print(f"正在寻找目标窗口：'{title}'...")
+    # 1. 查找窗口句柄（匹配测试版窗口）
+    title = "PhoneMic - 主界面 (Dev)"
+    print(f"正在寻找目标开发版窗口：'{title}'...")
     hwnd = win32gui.FindWindow(None, title)
 
     if hwnd == 0:
-        print("❌ 错误：未找到目标窗口！请确保 PhoneMic 已在 Windows 宿主机运行且主界面已显示。")
+        # 兜底查找英文环境开发版窗口
+        title_en = "PhoneMic - Main Window (Dev)"
+        hwnd = win32gui.FindWindow(None, title_en)
+
+    if hwnd == 0:
+        print("❌ 错误：未找到目标开发版窗口！")
+        print("   请确保您运行的是本次编译的开发测试版本，且窗口标题包含 ' (Dev)' 后缀。")
         sys.exit(1)
 
-    print(f"✅ 成功找到窗口，句柄 ID: {hwnd}")
+    print(f"✅ 成功找到开发版窗口，句柄 ID: {hwnd}")
     time.sleep(1)
 
     # 2. 模拟最小化事件并验证隐藏
@@ -49,10 +56,10 @@ def test_windows_gui():
         sys.exit(1)
     
     if not win32gui.IsWindow(hwnd):
-        print("❌ 失败：窗口发送最小化消息后，进程意外退出了！")
+        print("❌ 失败：窗口发送最小化消息后，开发版进程意外退出了！")
         sys.exit(1)
 
-    print("✅ 成功：主窗口已从任务栏和切窗视图隐藏，且后台进程保持运行。")
+    print("✅ 成功：开发版主窗口已从任务栏和切窗视图隐藏，且后台进程保持运行。")
     time.sleep(1)
 
     # 3. 恢复窗口显示
@@ -68,10 +75,10 @@ def test_windows_gui():
     time.sleep(2)
 
     if not win32gui.IsWindowVisible(hwnd):
-        print("❌ 失败：主窗口恢复显示后，依然不可见！")
+        print("❌ 失败：开发版主窗口恢复显示后，依然不可见！")
         sys.exit(1)
 
-    print("✅ 成功：主窗口恢复正常显示，并重新获得焦点。")
+    print("✅ 成功：开发版主窗口恢复正常显示，并重新获得焦点。")
     time.sleep(1)
 
     # 4. 模拟右上角 (X) 关闭按钮并验证拦截
@@ -89,19 +96,19 @@ def test_windows_gui():
         print("❌ 失败：点击关闭(X)后程序直接退出了，应该拦截并保持后台运行！")
         sys.exit(1)
 
-    print("✅ 成功：主窗口点击关闭(X)后成功转换为隐藏，且后台进程与连接保持正常。")
+    print("✅ 成功：开发版主窗口点击关闭(X)后成功转换为隐藏，且后台进程与连接保持正常。")
     time.sleep(1)
 
     # 5. 提示用户手动触发退出
     print("\n--- 步骤 4: 验证托盘右键退出进程 ---")
-    print("⚠️ 请在系统右下角托盘图标上【右键 -> 点击退出】来完成测试...")
+    print("⚠️ 请在右下角开发版托盘图标上【右键 -> 点击退出】来完成测试...")
     
     # 轮询 15 秒检查窗口句柄是否失效
     for i in range(15):
         if not win32gui.IsWindow(hwnd):
-            print("✅ 成功：检测到主窗口句柄已销毁，程序已彻底退出，系统端口释放。")
+            print("✅ 成功：检测到开发版窗口句柄已销毁，程序已彻底退出。")
             print("=" * 60)
-            print("🎉 恭喜！PhoneMic 最小化/关闭/退出全链路逻辑通过宿主机实机测试！")
+            print("🎉 恭喜！PhoneMic 开发测试版通过宿主机实机验证！")
             print("=" * 60)
             sys.exit(0)
         time.sleep(1)

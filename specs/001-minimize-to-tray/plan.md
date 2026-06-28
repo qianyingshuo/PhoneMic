@@ -6,7 +6,7 @@
 
 ## Summary
 
-实现 PhoneMic 电脑端主窗口点击右上角关闭 (X) 和最小化按钮时，将其隐藏至系统托盘（不再占用任务栏与 Alt+Tab 切窗列表），同时确保通过系统托盘的右键菜单“退出”可以真正并且安全地退出进程与释放端口。此外，在工程共享目录中提供一个可在 Windows 宿主机运行的自动化 GUI 验证脚本，用于低成本实机断言窗口的隐藏和存活状态。
+实现 PhoneMic 电脑端主窗口点击右上角关闭 (X) 和最小化按钮时，将其隐藏至系统托盘（不再占用任务栏与 Alt+Tab 切窗列表），同时确保通过系统托盘的右键菜单“退出”可以真正并且安全地退出进程与释放端口。此外，在工程共享目录中提供一个可在 Windows 宿主机运行的自动化 GUI 验证脚本。为了与用户正在运行的生产版 PhoneMic 隔离，开发测试版的窗口标题将硬编码或动态附加 `(Dev)` 后缀，且测试脚本将特异性匹配该标题。
 
 ## Technical Context
 
@@ -33,8 +33,9 @@
 
 **Scale/Scope**: 
 - 修改 2 个源文件（`dashboard.py` 与 `tray.py`）。
+  * 在 `dashboard.py` 中，设定标题时，将开发测试状态下的主窗口标题修改为增加 `(Dev)` 后缀，如 `"PhoneMic - 主界面 (Dev)"`。
 - 新增 1 个 WSL 单元测试文件（`test_dashboard_tray.py`）覆盖最小化隐藏、关闭拦截及强制退出。
-- 新增 1 个 Windows 自动化 GUI 测试验证脚本，并在项目和 Windows 宿主机的共享目录中同时输出：
+- 新增 1 个 Windows 自动化 GUI 测试验证脚本，匹配带 `(Dev)` 的开发版窗口：
   * 项目路径：`tests/test_windows_host_gui.py`
   * 宿主机共享路径：`/mnt/s/WSL/wsl_windows_test/test_windows_host_gui.py`
 
@@ -72,12 +73,12 @@ specs/001-minimize-to-tray/
 ```text
 phonemic/
 └── gui/
-    ├── dashboard.py     # 目标修改：重写 closeEvent/changeEvent，引入 _force_quit 标志
+    ├── dashboard.py     # 目标修改：重写 closeEvent/changeEvent，引入 _force_quit 标志，标题拼接 " (Dev)"
     └── tray.py          # 目标修改：修改退出项为绑定自定义退出函数以设置 _force_quit=True
 
 tests/
 ├── test_dashboard_tray.py  # 新增 WSL 测试文件：编写失败测试并驱动功能开发
-└── test_windows_host_gui.py # 新增 Windows 自动化验证脚本
+└── test_windows_host_gui.py # 新增 Windows 自动化验证脚本（匹配 (Dev) 窗口）
 ```
 
 **Structure Decision**: 采用标准的 Single Project（单项目单测试模块）结构。在修改 `dashboard.py` 与 `tray.py` 的同时，新增 `tests/test_dashboard_tray.py` 自动化测试脚本驱动开发。此外，在 Windows 共享目录下输出 `test_windows_host_gui.py` 供宿主机直接运行。
