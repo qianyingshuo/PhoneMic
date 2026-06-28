@@ -45,23 +45,48 @@ class ConnectionManager:
         """
         self.active_connection: Optional[WebSocket] = None
         self.bridge = bridge
+        self.loop = None
 
         # 配置热重载支持
         self.sm = SettingsManager.instance()
         self.max_records = self.sm.get("mobile_max_records", 10)
         # 监听配置变更
         self.sm.connect_changed("mobile_max_records", self._on_max_records_changed)
+        self.sm.connect_changed("key_mappings", self._on_key_mappings_changed)
 
     def _on_max_records_changed(self, new_value: int) -> None:
         """当 mobile_max_records 配置变更时更新内存值（无需重启）"""
         self.max_records = new_value
         logger.info(f"Mobile max records updated to {new_value}")
 
+    def _on_key_mappings_changed(self, new_value: list) -> None:
+        """当 key_mappings 发生变化时向手机端广播局部热更新"""
+        import asyncio
+        if self.active_connection is not None and self.loop is not None:
+            asyncio.run_coroutine_threadsafe(self.send_key_mappings(), self.loop)
+
+    async def send_key_mappings(self) -> None:
+        """获取最新按键映射并推送到手机端"""
+        from phonemic.utils.key_mappings_manager import KeyMappingsManager
+        if self.active_connection is not None:
+            try:
+                mappings = KeyMappingsManager().get_key_mappings()
+                await self.active_connection.send_json({
+                    "type": "key_mappings",
+                    "data": mappings
+                })
+                logger.debug("Sent key_mappings to client")
+            except Exception as e:
+                logger.warning(f"Failed to send key_mappings: {e}")
+
     async def connect(self, websocket: WebSocket) -> None:
         """
         接受新的 WebSocket 连接。
         如果已有连接，先关闭旧连接（保证同时只有一个手机连接）。
         """
+        import asyncio
+        self.loop = asyncio.get_running_loop()
+
         # 关闭已有连接（若有）
         if self.active_connection is not None:
             old_ws = self.active_connection
@@ -89,6 +114,9 @@ class ConnectionManager:
         except Exception as e:
             logger.warning(f"Failed to send initial config: {e}")
 
+        # 紧接着同步下发按键映射列表
+        await self.send_key_mappings()
+
     def disconnect(self, websocket: WebSocket) -> None:
         """
         清理连接状态，并通知主进程断开事件。
@@ -113,7 +141,21 @@ class ConnectionManager:
                     text = message.get("text", "")
 
                     if msg_type in ("preview", "send"):
-                        self.bridge.emit(msg_type, text)
+                        if msg_type == "send":
+                            # 如果是 send 消息，且有追加的快捷键，则发送字典；否则发送纯字符串以维持向下兼容性
+                            key_mapping_id = message.get("key_mapping_id", "none")
+                            key_sequence = message.get("key_sequence", "")
+                            if key_mapping_id != "none" or key_sequence:
+                                payload = {
+                                    "text": text,
+                                    "key_mapping_id": key_mapping_id,
+                                    "key_sequence": key_sequence
+                                }
+                            else:
+                                payload = text
+                            self.bridge.emit(msg_type, payload)
+                        else:
+                            self.bridge.emit(msg_type, text)
                         logger.debug(f"Received {msg_type}: {text[:50]}...")
                     else:
                         logger.warning(f"Unknown message type: {msg_type}")
@@ -263,3 +305,28 @@ def stop_server() -> None:
     if _server:
         _server.should_exit = True
         _server_thread.join(timeout=2.0)
+
+def send_warning_notification(text: str) -> None:
+    """向手机网页端发送警告信息"""
+    import asyncio
+    global _manager
+    if _manager and _manager.active_connection and _manager.loop:
+        asyncio.run_coroutine_threadsafe(
+            _manager.active_connection.send_json({
+                "type": "warning",
+                "text": text
+            }),
+            _manager.loop
+        )
+
+def send_reload_command() -> None:
+    """向手机网页端发送重新加载页面的指令"""
+    import asyncio
+    global _manager
+    if _manager and _manager.active_connection and _manager.loop:
+        asyncio.run_coroutine_threadsafe(
+            _manager.active_connection.send_json({
+                "type": "reload"
+            }),
+            _manager.loop
+        )

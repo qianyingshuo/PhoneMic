@@ -47,16 +47,16 @@
 
 ### Tests for User Story 1 (MANDATORY - TDD Phase) ⚠️
 
-- [ ] T004 [US1] 编写 WebSocket 建立连接时自动同步 key_mappings 列表和接收 send payload 字典的 contract 测试，位于 tests/contract/test_key_mappings_ws.py (RED)
-- [ ] T005 [US1] 编写 PC 客户端在接收 send 字典时模拟按键执行、UUID 查找以及防错乱安全降级的单元测试，位于 tests/unit/test_key_mappings_trigger.py (RED)
+- [X] T004 [US1] 编写 WebSocket 建立连接时自动同步 key_mappings 列表和接收 send payload 字典的 contract 测试，位于 tests/contract/test_key_mappings_ws.py (RED)
+- [X] T005 [US1] 编写 PC 客户端在接收 send 字典时模拟按键执行、UUID 查找以及防错乱安全降级的单元测试，位于 tests/unit/test_key_mappings_trigger.py (RED)
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] 在后端服务中，实现连接建立时下发配置字典、广播映射配置列表、解析 send 携带 key_sequence 字段并转发的逻辑，位于 phonemic/server/api.py (GREEN)
-- [ ] T007 [US1] 在主事件监听中，实现对 send 消息字典的解析逻辑：粘贴 text 后如果 key_sequence 不为空，则调用 keyboard.send_keys 执行按键序列，同时支持未知 ID 安全降级，位于 phonemic/PhoneMic.py (GREEN)
-- [ ] T008 [P] [US1] 编写手机网页端左侧设置抽屉（Drawer）的 HTML 结构、半透明遮罩面板以及平滑抽拉过渡的 CSS 样式，位于 phonemic/resources/mobile.html (GREEN)
-- [ ] T009 [US1] 编写手机网页端 WebSocket 消息侦听（更新 ComboBox 选项）、LocalStorage 选中偏好缓存回显、以及点击发送时合并打包 key_sequence 字段发送的 JS 脚本逻辑，位于 phonemic/resources/mobile.html (GREEN)
-- [ ] T010 [US1] 补充后端通过 WebSocket 向手机端推送失效警告通知与 reload 兜底重载页面控制协议的支持方法，位于 phonemic/server/api.py (GREEN)
+- [X] T006 [US1] 在后端服务中，实现连接建立时下发配置字典、广播映射配置列表、解析 send 携带 key_sequence 字段并转发的逻辑，位于 phonemic/server/api.py (GREEN)
+- [X] T007 [US1] 在主事件监听中，实现对 send 消息字典的解析逻辑：粘贴 text 后如果 key_sequence 不为空，则调用 keyboard.send_keys 执行按键序列，同时支持未知 ID 安全降级，位于 phonemic/PhoneMic.py (GREEN)
+- [X] T008 [P] [US1] 编写手机网页端左侧设置抽屉（Drawer）的 HTML 结构、半透明遮罩面板以及平滑抽拉过渡的 CSS 样式，位于 phonemic/resources/mobile.html (GREEN)
+- [X] T009 [US1] 编写手机网页端 WebSocket 消息侦听（更新 ComboBox 选项）、LocalStorage 选中偏好缓存回显、以及点击发送时合并打包 key_sequence 字段发送的 JS 脚本逻辑，位于 phonemic/resources/mobile.html (GREEN)
+- [X] T010 [US1] 补充后端通过 WebSocket 向手机端推送失效警告通知与 reload 兜底重载页面控制协议的支持方法，位于 phonemic/server/api.py (GREEN)
 
 **Checkpoint**: 至此，User Story 1（追加快捷键发送核心功能）已开发完毕，能作为 MVP 版本独立运行和测试。
 

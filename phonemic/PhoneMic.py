@@ -16,13 +16,14 @@ from phonemic.bridge_queue import QueueEventBridge
 from phonemic.gui.dashboard import Dashboard
 from phonemic.gui.hud import HudWindow, get_hud_signals
 from phonemic.gui.ip_selector import IpSelector
-from phonemic.gui.keyboard import flash_insert
+from phonemic.gui.keyboard import flash_insert, send_keys
 from phonemic.gui.tray import SystemTray
 from phonemic.server.api import start_server, stop_server  # 待确认函数名
 from phonemic.utils.network import get_all_lan_ips, find_free_port
 from phonemic.utils.paths import get_res_path
 from phonemic.utils.i18n import I18n
 from phonemic.utils.command_processor import CommandInterceptor
+from phonemic.utils.key_mappings_manager import KeyMappingsManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,6 +45,46 @@ class QueueSignals(QObject):
             daemon=True
         )
         self.monitor_thread.start()
+
+def handle_send_event(payload: Any, command_interceptor, key_mappings_manager, ws_warning_callback=None):
+    """
+    处理后端发来的 send 事件负载。
+    如果匹配命令则执行命令；
+    否则粘贴文本并触发追加的按键序列。
+    如果 ID 非法或失效，执行降级且不触发按键模拟，并可通过 callback 触发警告通知。
+    """
+    # payload 可以是字符串（旧协议兼容）或者字典 {"text": text, "key_mapping_id": key_mapping_id, "key_sequence": key_sequence}
+    if isinstance(payload, dict):
+        text = payload.get("text", "")
+        key_mapping_id = payload.get("key_mapping_id", "none")
+        key_sequence = payload.get("key_sequence", "")
+    else:
+        text = str(payload)
+        key_mapping_id = "none"
+        key_sequence = ""
+
+    # 先匹配命令，若匹配则返回，不进行粘贴及按键追加
+    if command_interceptor.process_send_text(text):
+        return
+
+    # 进行 ID 校验
+    should_send = True
+    if key_mapping_id != "none":
+        # 查找 ID
+        mapping = key_mappings_manager.get_key_mapping(key_mapping_id)
+        if not mapping:
+            # 降级：不触发按键
+            should_send = False
+            # 发送警告通知
+            if ws_warning_callback:
+                ws_warning_callback("按键映射已在电脑端被删除，已自动重置为“无 (不追加)”")
+
+    # 执行粘贴
+    flash_insert(text)
+
+    # 模拟按键序列
+    if should_send and key_sequence:
+        send_keys(key_sequence)
 
 def wait_for_server(host: str, port: int, timeout: float = 5.0) -> bool:
     """等待服务器就绪，返回是否成功"""
@@ -119,13 +160,14 @@ def main():
     tray = SystemTray(dashboard, get_res_path("favicon.ico"))   # 确保路径正确
 
     command_interceptor = CommandInterceptor()
+    key_mappings_manager = KeyMappingsManager()
     # 6. 启动队列监控
     def on_backend_event(event_type: str, payload: Any):
         if event_type == "preview":
             hud.on_preview_text(payload)   # 需提前获取 hud 实例
         elif event_type == "send":
-            if not command_interceptor.process_send_text(payload):
-                flash_insert(payload)
+            from phonemic.server.api import send_warning_notification
+            handle_send_event(payload, command_interceptor, key_mappings_manager, ws_warning_callback=send_warning_notification)
             hud.hide()
         elif event_type == "connect":
             dashboard.update_connection_status(True)

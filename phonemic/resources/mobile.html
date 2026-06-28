@@ -175,6 +175,101 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        /* ========== Header Bar ========== */
+        #header-bar {
+            height: 48px;
+            background-color: var(--bar-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            flex-shrink: 0;
+        }
+        #btn-menu {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            color: #333;
+            line-height: 1;
+        }
+        #header-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        /* ========== Drawer & Overlay ========== */
+        #drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #drawer-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+        #drawer.open {
+            transform: translateX(0);
+        }
+        .drawer-header {
+            padding: 16px;
+            border-bottom: 1px solid #eeeeee;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .drawer-content {
+            padding: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .setting-item {
+            margin-bottom: 20px;
+        }
+        .setting-item label {
+            display: block;
+            font-size: 14px;
+            color: #666666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .setting-item select {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 1px solid #cccccc;
+            background-color: #fafafa;
+            outline: none;
+        }
+
         * {
             -webkit-user-select: none;
             user-select: none;
@@ -187,7 +282,26 @@
     </style>
 </head>
 <body>
+<div id="drawer-overlay"></div>
+<div id="drawer">
+    <div class="drawer-header">
+        {{ __I18N__.drawer_title | default("设置") }}
+    </div>
+    <div class="drawer-content">
+        <div class="setting-item">
+            <label for="key-mapping-select">{{ __I18N__.label_key_mapping | default("追加按键映射") }}</label>
+            <select id="key-mapping-select">
+                <option value="none" data-keys="">无 (不追加)</option>
+            </select>
+        </div>
+    </div>
+</div>
 <div id="app">
+    <div id="header-bar">
+        <button id="btn-menu" aria-label="打开设置">☰</button>
+        <span id="header-title">PhoneMic</span>
+        <div style="width: 40px;"></div>
+    </div>
     <div id="status-bar"></div>
     <div id="chat-list"></div>
     <div id="bottom-bar">
@@ -354,9 +468,9 @@
         _notifyStatusChange(connected) {
             document.dispatchEvent(new CustomEvent('ws-status', { detail: { connected } }));
         }
-        send(type, text) {
+        send(type, text, extra = {}) {
             if (!this.isConnected || !this.ws || this.ws.readyState !== WebSocket.OPEN) return false;
-            this.ws.send(JSON.stringify({ type, text }));
+            this.ws.send(JSON.stringify({ type, text, ...extra }));
             return true;
         }
         getConnected() { return this.isConnected; }
@@ -507,7 +621,16 @@
         sendCurrentMessage() {
             const text = this.inputBox.value;
             if (!text.trim()) return;
-            this.wsClient.send('send', text);
+
+            const select = document.getElementById('key-mapping-select');
+            const opt = select.options[select.selectedIndex];
+            const keyMappingId = opt ? opt.value : 'none';
+            const keySequence = opt ? (opt.getAttribute('data-keys') || '') : '';
+
+            this.wsClient.send('send', text, {
+                key_mapping_id: keyMappingId,
+                key_sequence: keySequence
+            });
             this.chatManager.addMessage(text);
             this.inputBox.value = '';
             this.adjustHeight();
@@ -516,7 +639,16 @@
         }
         sendExternalMessage(text) {
             if (!text.trim()) return;
-            this.wsClient.send('send', text);
+
+            const select = document.getElementById('key-mapping-select');
+            const opt = select.options[select.selectedIndex];
+            const keyMappingId = opt ? opt.value : 'none';
+            const keySequence = opt ? (opt.getAttribute('data-keys') || '') : '';
+
+            this.wsClient.send('send', text, {
+                key_mapping_id: keyMappingId,
+                key_sequence: keySequence
+            });
             this.chatManager.addMessage(text);
         }
         adjustHeight() {
@@ -599,12 +731,69 @@
         
         new MessageInteractionManager(chatContainer, uiController, wsClient);
         
+        // Drawer trigger setup
+        const btnMenu = document.getElementById('btn-menu');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        const select = document.getElementById('key-mapping-select');
+        
+        btnMenu.addEventListener('click', () => {
+            drawer.classList.add('open');
+            overlay.classList.add('open');
+        });
+        overlay.addEventListener('click', () => {
+            drawer.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+        select.addEventListener('change', (e) => {
+            localStorage.setItem('selected_key_mapping_id', e.target.value);
+        });
+
         wsClient.on('config', (data) => {
             if (data.mobile_max_records !== undefined) {
                 appConfig.set('maxHistory', data.mobile_max_records);
                 console.log(window.i18n.log_config_updated + data.mobile_max_records);
             }
         });
+        
+        wsClient.on('key_mappings', (data) => {
+            const mappings = data.data || [];
+            const savedId = localStorage.getItem('selected_key_mapping_id') || 'none';
+            
+            select.innerHTML = '<option value="none" data-keys="">无 (不追加)</option>';
+            
+            let idExists = false;
+            mappings.forEach(item => {
+                if (item.id === 'none') return;
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.name;
+                opt.setAttribute('data-keys', item.keys);
+                select.appendChild(opt);
+                
+                if (item.id === savedId) {
+                    idExists = true;
+                }
+            });
+            
+            if (savedId !== 'none' && idExists) {
+                select.value = savedId;
+            } else {
+                select.value = 'none';
+                localStorage.setItem('selected_key_mapping_id', 'none');
+            }
+        });
+
+        wsClient.on('warning', (data) => {
+            alert(data.text);
+            select.value = 'none';
+            localStorage.setItem('selected_key_mapping_id', 'none');
+        });
+
+        wsClient.on('reload', () => {
+            window.location.reload();
+        });
+
         wsClient.on('send', (data) => console.log("[WS] 收到 send 回声:", data));
         
         wsClient.connect();
