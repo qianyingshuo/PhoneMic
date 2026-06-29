@@ -6,15 +6,16 @@ from pathlib import Path
 
 def get_app_root() -> Path:
     """
-    返回应用根目录（ phonemic 包的父目录）。
-    假设目录结构：
-    project_root/
-        phonemic/
-            resources/
-            utils/
-                paths.py
+    返回应用根目录。
+    支持开发环境（通过 __file__）以及 Nuitka 打包环境（通过 sys.executable / sys.argv[0]）。
     """
-    return Path(__file__).parent.parent.parent
+    if "__compiled__" in globals() or hasattr(sys, "frozen"):
+        return Path(sys.executable).parent
+    
+    try:
+        return Path(__file__).parent.parent.parent
+    except NameError:
+        return Path(sys.executable).parent
 
 def get_res_path(relative_path: str) -> str:
     """返回 resources 目录下某个相对路径的绝对路径"""

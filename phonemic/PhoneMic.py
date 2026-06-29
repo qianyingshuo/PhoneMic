@@ -3,9 +3,65 @@ import multiprocessing
 import sys
 import threading
 import time
+import traceback
 from pathlib import Path
 from typing import Any
 
+# 配置本地日志目录
+LOG_DIR = Path.home() / ".phonemic"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "app.log"
+CRASH_LOG = LOG_DIR / "crash.log"
+
+# 配置日志，同时输出到文件和终端
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding='utf-8'),
+        logging.StreamHandler(sys.stderr)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# 配置崩溃捕获
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    
+    error_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    logger.critical("Unhandled exception:", exc_info=(exc_type, exc_value, exc_traceback))
+    
+    try:
+        with open(CRASH_LOG, "a", encoding="utf-8") as f:
+            f.write(f"\n=== Crash at {time.strftime('%Y-%m-%d %H:%M:%S')} ===\n")
+            f.write(error_msg)
+    except Exception as e:
+        print(f"Failed to write crash log: {e}", file=sys.stderr)
+        
+    try:
+        # 延迟导入，防止因为 PySide6 导入错误导致弹窗失败
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        app = QApplication.instance()
+        if app is None:
+            app = QApplication(sys.argv)
+        QMessageBox.critical(
+            None, 
+            "PhoneMic 崩溃", 
+            f"程序在运行期间发生未捕获异常而崩溃。\n\n"
+            f"日志记录至: {LOG_FILE}\n"
+            f"崩溃堆栈记录至: {CRASH_LOG}\n\n"
+            f"错误信息: {exc_value}"
+        )
+    except Exception as dialog_err:
+        logger.error(f"Failed to show QMessageBox error dialog: {dialog_err}")
+        
+    sys.exit(1)
+
+sys.excepthook = handle_exception
+
+# 延迟/安全导入第三方模块
 import requests
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap
@@ -18,15 +74,12 @@ from phonemic.gui.hud import HudWindow, get_hud_signals
 from phonemic.gui.ip_selector import IpSelector
 from phonemic.gui.keyboard import flash_insert, send_keys
 from phonemic.gui.tray import SystemTray
-from phonemic.server.api import start_server, stop_server  # 待确认函数名
+from phonemic.server.api import start_server, stop_server
 from phonemic.utils.network import get_all_lan_ips, find_free_port
 from phonemic.utils.paths import get_res_path
 from phonemic.utils.i18n import I18n
 from phonemic.utils.command_processor import CommandInterceptor
 from phonemic.utils.key_mappings_manager import KeyMappingsManager
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 class QueueSignals(QObject):
     event_signal = Signal(str, object)
