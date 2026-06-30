@@ -215,7 +215,23 @@ def test_mobile_html_websocket_protocol_adaptation():
     with open(mobile_html_path, "r", encoding="utf-8") as f:
         content = f.read()
         
-    # 断言包含自适应安全连接协议的逻辑
+    # 断言包含自适应安全连接协议 the 逻辑
     assert "window.location.protocol === 'https:' ? 'wss:' : 'ws:'" in content
+
+
+def test_mobile_html_send_mapping_button():
+    """验证 mobile.html 中包含了单独发送按键映射的按钮以及对应的 JS 发送逻辑"""
+    from phonemic.utils.paths import get_app_root
+    mobile_html_path = get_app_root() / "phonemic" / "resources" / "mobile.html"
+    assert mobile_html_path.exists(), "mobile.html 模板文件必须存在"
+    
+    with open(mobile_html_path, "r", encoding="utf-8") as f:
+        content = f.read()
+        
+    # 1. 检查是否在 HTML 中定义了单独发送按键映射的按钮 (btn-send-mapping)
+    assert "btn-send-mapping" in content
+    
+    # 2. 检查是否在 JS 中包含发送空 text 和当前映射的 WebSocket 调用逻辑
+    assert "this.wsClient.send('send', '', {" in content
 
 

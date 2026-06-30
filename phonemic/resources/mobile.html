@@ -75,6 +75,73 @@
             opacity: 0.6;
             filter: grayscale(0.5);
         }
+        #shortcut-bar {
+            background-color: var(--bar-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(229, 229, 229, 0.5);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+        }
+        .shortcut-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+        }
+        .shortcut-label {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        #key-mapping-select {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            outline: none;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            color: #333;
+            max-width: 150px;
+        }
+        #btn-send-mapping {
+            background: linear-gradient(135deg, #07c160, #10b981);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 6px rgba(7, 193, 96, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+        #btn-send-mapping:active {
+            transform: scale(0.95);
+            filter: brightness(0.9);
+            box-shadow: 0 1px 3px rgba(7, 193, 96, 0.1);
+        }
+        #btn-send-mapping:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
         #bottom-bar {
             background-color: var(--bar-bg);
             backdrop-filter: blur(10px);
@@ -288,12 +355,9 @@
         {{ __I18N__.drawer_title | default("设置") }}
     </div>
     <div class="drawer-content">
-        <div class="setting-item">
-            <label for="key-mapping-select">{{ __I18N__.label_key_mapping | default("追加按键映射") }}</label>
-            <select id="key-mapping-select">
-                <option value="none" data-keys="">无 (不追加)</option>
-            </select>
-        </div>
+        <p style="font-size: 14px; color: #888; text-align: center; margin-top: 40px;">
+            设置已移至主界面底部快捷操作栏
+        </p>
     </div>
 </div>
 <div id="app">
@@ -304,6 +368,15 @@
     </div>
     <div id="status-bar"></div>
     <div id="chat-list"></div>
+    <div id="shortcut-bar">
+        <div class="shortcut-wrapper">
+            <span class="shortcut-label">⚡ {{ __I18N__.label_key_mapping | default("追加映射") }}:</span>
+            <select id="key-mapping-select">
+                <option value="none" data-keys="">无 (不追加)</option>
+            </select>
+        </div>
+        <button id="btn-send-mapping" aria-label="单独发送按键映射">🚀 单独发送</button>
+    </div>
     <div id="bottom-bar">
         <button id="btn-clear" aria-label="清空输入框">🗑️</button>
         <div class="input-wrapper">
@@ -558,6 +631,7 @@
             this.chatManager = chatManager;
             this.wsClient = wsClient;
             this.config = configManager;
+            this.btnSendMapping = document.getElementById('btn-send-mapping');
             this.autoMode = true;
             this.isComposing = false;
             // 设置清空按钮的 aria-label
@@ -615,8 +689,35 @@
                 this.updateModeToggleVisibility();
                 this.inputBox.focus();
             });
+            if (this.btnSendMapping) {
+                this.btnSendMapping.addEventListener('click', (e) => {
+                    if (!this.wsClient.getConnected()) return;
+                    e.preventDefault();
+                    this.sendKeyMappingOnly();
+                });
+            }
             document.addEventListener('ws-status', (e) => this.onConnectionChange(e.detail.connected));
             this.setupScrollFix();
+        }
+        sendKeyMappingOnly() {
+            const select = document.getElementById('key-mapping-select');
+            const opt = select.options[select.selectedIndex];
+            const keyMappingId = opt ? opt.value : 'none';
+            const keySequence = opt ? (opt.getAttribute('data-keys') || '') : '';
+
+            if (keyMappingId === 'none' || !keySequence) {
+                return;
+            }
+
+            this.wsClient.send('send', '', {
+                key_mapping_id: keyMappingId,
+                key_sequence: keySequence
+            });
+
+            if (navigator.vibrate) navigator.vibrate(20);
+
+            const showName = opt.textContent;
+            this.chatManager.addMessage(`[模拟按键] ${showName} (${keySequence})`);
         }
         sendCurrentMessage() {
             const text = this.inputBox.value;
@@ -683,6 +784,7 @@
                 this.btnSend.disabled = false;
                 this.btnClear.disabled = false;
                 this.modeToggle.disabled = false;
+                if (this.btnSendMapping) this.btnSendMapping.disabled = false;
                 this.updateSendButtonUI();
                 this.updateModeToggleVisibility();
             } else {
@@ -693,6 +795,7 @@
                 this.btnSend.disabled = true;
                 this.btnClear.disabled = true;
                 this.modeToggle.disabled = true;
+                if (this.btnSendMapping) this.btnSendMapping.disabled = true;
                 this.modeToggle.style.display = 'none';
                 this.inputBox.placeholder = window.i18n.input_placeholder_disconnected;
             }
