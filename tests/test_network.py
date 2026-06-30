@@ -18,9 +18,14 @@ def test_get_all_lan_ips_returns_list():
 # ========== 测试 find_free_port ==========
 def test_find_free_port_finds_a_port():
     """测试函数能找到一个可用的端口"""
-    port = find_free_port(start_port=9000)
+    # 动态获取一个系统分配的空闲端口作为起点，保证测试在任何受限容器环境均能通过
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tmp_s:
+        tmp_s.bind(("", 0))
+        free_port = tmp_s.getsockname()[1]
+
+    port = find_free_port(start_port=free_port)
     assert isinstance(port, int)
-    assert port >= 9000
+    assert port >= free_port
     # 验证端口确实可用
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         assert s.bind(("", port)) is None # bind 成功时返回 None

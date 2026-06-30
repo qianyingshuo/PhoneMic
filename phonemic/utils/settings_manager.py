@@ -50,7 +50,7 @@ class SettingsManager(QObject):
             "mobile_max_records": 10,
             "language": system_lang.detect_system_language()
         }
-        print(f"default lan is {default["language"]}")
+        print(f"default lan is {default['language']}")
         
         path = self._get_config_path()
         if path.exists():
