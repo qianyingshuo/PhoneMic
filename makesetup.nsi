@@ -28,6 +28,55 @@ Page license
 Page directory
 Page instfiles
 
+Function .onInit
+  # 1. 前置拦截：检测 PhoneMic 是否正在运行
+  FindWindow $0 "" "PhoneMic"
+  IntCmp $0 0 notRunning
+    MessageBox MB_OK|MB_ICONSTOP "检测到 ${APP_NAME} 正在运行，请先关闭程序再进行安装。"
+    Abort
+  notRunning:
+
+  # 2. 检测旧版本
+  ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "UninstallString"
+  ReadRegStr $R1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation"
+  
+  # 若未检测到旧版，直接继续安装
+  StrCmp $R0 "" noOldVersion
+  
+  # 3. 弹窗提示确认卸载旧版本并升级
+  MessageBox MB_YESNO|MB_ICONQUESTION "检测到系统已安装 ${APP_NAME} 的旧版本。$\n$\n是否先自动卸载旧版本以进行干净的升级安装？$\n（注意：这不会删除您的个人配置文件及按键映射）" IDYES proceedUninstall
+    # 选择“否”，终止安装
+    MessageBox MB_OK|MB_ICONINFORMATION "升级安装已取消。"
+    Abort
+
+  proceedUninstall:
+    # 4. 校验旧版卸载文件 uninst.exe 是否存在
+    StrCmp $R1 "" useDefaultDir
+    Goto checkUninst
+  useDefaultDir:
+    StrCpy $R1 "$PROGRAMFILES\${APP_NAME}"
+
+  checkUninst:
+    IfFileExists "$R1\uninst.exe" runUninstaller
+      # 卸载程序丢失，提示手动清理
+      MessageBox MB_OK|MB_ICONSTOP "未找到旧版本的卸载程序（uninst.exe已丢失）。$\n$\n请先手动删除以下安装目录以清除旧版本，然后再重新运行安装：$\n$R1"
+      Abort
+
+  runUninstaller:
+    # 5. 同步静默执行旧版本卸载
+    ExecWait '"$R1\uninst.exe" /S _?=$R1' $R2
+    
+    # 6. 校验卸载结果
+    IfFileExists "$R1\uninst.exe" uninstallFailed
+      Goto noOldVersion
+
+  uninstallFailed:
+    MessageBox MB_OK|MB_ICONSTOP "旧版本卸载失败。请确保 PhoneMic 未在后台运行，或手动删除该目录后再试：$\n$R1"
+    Abort
+
+  noOldVersion:
+FunctionEnd
+
 Section
   SetShellVarContext all
 
@@ -47,6 +96,7 @@ Section
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "Publisher" "${PUBLISHER}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "BuildDate" "${BUILD_DATE}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "BuildCommit" "${BUILD_COMMIT}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation" "$INSTDIR"
 SectionEnd
 
 Function un.onInit

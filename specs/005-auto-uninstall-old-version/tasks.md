@@ -22,7 +22,7 @@
 
 **Purpose**: 为安全修改脚本做前置工作。
 
-- [ ] T002 创建原始安装配置文件的备份 `makesetup.nsi.bak` 以便回滚
+- [x] T002 创建原始安装配置文件的备份 `makesetup.nsi.bak` 以便回滚
 
 ---
 
@@ -30,7 +30,7 @@
 
 **Goal**: 在安装包启动的最开头检测 PhoneMic 是否在运行，如果是则强行拦截并退出，防止文件覆盖失败或重复弹窗。
 
-- [ ] T003 [US4] 在 `makesetup.nsi` 的 `.onInit` 函数最开头编写使用 `FindWindow` 检测 `"PhoneMic"` 句柄的逻辑，若运行则弹出警告并 Abort 退出。
+- [x] T003 [US4] 在 `makesetup.nsi` 的 `.onInit` 函数最开头编写使用 `FindWindow` 检测 `"PhoneMic"` 句柄的逻辑，若运行则弹出警告并 Abort 退出。
 - [ ] T004 [US4] 依照 `specs/005-auto-uninstall-old-version/quickstart.md` 中的“场景 2”手动验证进程占用前置拦截，确保在程序运行时仅弹窗一次便安全退出。
 
 ---
@@ -39,9 +39,9 @@
 
 **Goal**: 检测注册表以确认是否已安装旧版本；若存在，弹窗提示用户确认卸载。选择“是”则同步静默调用旧卸载器，选择“否”则退出。
 
-- [ ] T005 [US1] 在 `makesetup.nsi` 的 `.onInit` 进程检测通过后，增加读取注册表 `HKLM` 检测旧版 `UninstallString` 和 `InstallLocation` 的逻辑。
-- [ ] T006 [US1] 在 `.onInit` 中增加 `MessageBox MB_YESNO` 弹窗提示，当用户选择“是”时，使用 `ExecWait` 配合 `_?=` 语法同步且静默地运行旧版 `uninst.exe`。
-- [ ] T007 [US2] 在 `.onInit` 中编写用户选择“否”的分支，弹出提示“升级安装已取消”并调用 `Abort` 退出。
+- [x] T005 [US1] 在 `makesetup.nsi` 的 `.onInit` 进程检测通过后，增加读取注册表 `HKLM` 检测旧版 `UninstallString` 和 `InstallLocation` 的逻辑。
+- [x] T006 [US1] 在 `.onInit` 中增加 `MessageBox MB_YESNO` 弹窗提示，当用户选择“是”时，使用 `ExecWait` 配合 `_?=` 语法同步且静默地运行旧版 `uninst.exe`。
+- [x] T007 [US2] 在 `.onInit` 中编写用户选择“否”的分支，弹出提示“升级安装已取消”并调用 `Abort` 退出。
 - [ ] T008 [US1] 依照 `specs/005-auto-uninstall-old-version/quickstart.md` 验证“场景 1”、“场景 3”和“场景 4”，确保正常升级完成且个人配置文件未被删除，拒绝升级时安装能正确取消。
 
 ---
@@ -50,8 +50,8 @@
 
 **Goal**: 在旧版卸载器丢失或执行失败时进行安全拦截和提示，不强行覆盖。
 
-- [ ] T009 [US3] 在 `makesetup.nsi` 决定卸载旧版后，前置校验 `uninst.exe` 是否存在。若丢失，弹窗指导用户手动删除安装路径，并调用 `Abort` 退出。
-- [ ] T010 [US3] 在 `makesetup.nsi` 运行静默卸载后，再次利用 `IfFileExists` 检验 `uninst.exe` 是否已消失。若依然存在（表示卸载失败），弹出警告并 Abort。
+- [x] T009 [US3] 在 `makesetup.nsi` 决定卸载旧版后，前置校验 `uninst.exe` 是否存在。若丢失，弹窗指导用户手动删除安装路径，并调用 `Abort` 退出。
+- [x] T010 [US3] 在 `makesetup.nsi` 运行静默卸载后，再次利用 `IfFileExists` 检验 `uninst.exe` 是否已消失。若依然存在（表示卸载失败），弹出警告并 Abort。
 - [ ] T011 [US3] 依照 `specs/005-auto-uninstall-old-version/quickstart.md` 验证“场景 5”，在手动删除 `uninst.exe` 但注册表残留时，确保安装包能给出具体路径的删除指引并安全终止。
 
 ---
