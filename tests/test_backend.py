@@ -219,8 +219,8 @@ def test_mobile_html_websocket_protocol_adaptation():
     assert "window.location.protocol === 'https:' ? 'wss:' : 'ws:'" in content
 
 
-def test_mobile_html_send_mapping_button():
-    """验证 mobile.html 中包含了单独发送按键映射的按钮以及对应的 JS 发送逻辑"""
+def test_mobile_html_key_mappings_redesign():
+    """验证 mobile.html 中双下拉框、LocalStorage 持久化缓存以及火箭发送按钮移除的逻辑"""
     from phonemic.utils.paths import get_app_root
     mobile_html_path = get_app_root() / "phonemic" / "resources" / "mobile.html"
     assert mobile_html_path.exists(), "mobile.html 模板文件必须存在"
@@ -228,10 +228,16 @@ def test_mobile_html_send_mapping_button():
     with open(mobile_html_path, "r", encoding="utf-8") as f:
         content = f.read()
         
-    # 1. 检查是否在 HTML 中定义了单独发送按键映射的按钮 (btn-send-mapping)
-    assert "btn-send-mapping" in content
+    # 1. 检查是否定义了两个独立的下拉选择框
+    assert "key-mapping-select" in content
+    assert "single-key-mapping-select" in content
     
-    # 2. 检查是否在 JS 中包含发送空 text 和当前映射的 WebSocket 调用逻辑
-    assert "this.wsClient.send('send', '', {" in content
+    # 2. 检查是否在 LocalStorage 中对这两个选择项进行了独立持久化
+    assert "selected_key_mapping_id" in content
+    assert "selected_single_key_mapping_id" in content
+    
+    # 3. 检查旧的 physical rocket 发送按钮 (btn-send-mapping) 是否已被完全移除
+    assert "btn-send-mapping" not in content
+
 
 
