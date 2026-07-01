@@ -101,10 +101,10 @@
             white-space: nowrap;
             font-weight: 500;
         }
-        #key-mapping-select {
+        #key-mapping-select, #single-key-mapping-select {
             flex: 1;
             padding: 6px 8px;
-            font-size: 14px;
+            font-size: 13px;
             border-radius: 6px;
             border: 1px solid #ddd;
             background-color: #fff;
@@ -113,34 +113,7 @@
             white-space: nowrap;
             overflow: hidden;
             color: #333;
-            max-width: 150px;
-        }
-        #btn-send-mapping {
-            background: linear-gradient(135deg, #07c160, #10b981);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 7px 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            box-shadow: 0 2px 6px rgba(7, 193, 96, 0.2);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            white-space: nowrap;
-        }
-        #btn-send-mapping:active {
-            transform: scale(0.95);
-            filter: brightness(0.9);
-            box-shadow: 0 1px 3px rgba(7, 193, 96, 0.1);
-        }
-        #btn-send-mapping:disabled {
-            background: #d1d5db;
-            color: #9ca3af;
-            box-shadow: none;
-            cursor: not-allowed;
+            min-width: 0;
         }
         #bottom-bar {
             background-color: var(--bar-bg);
@@ -370,12 +343,17 @@
     <div id="chat-list"></div>
     <div id="shortcut-bar">
         <div class="shortcut-wrapper">
-            <span class="shortcut-label">⚡ {{ __I18N__.label_key_mapping | default("追加映射") }}:</span>
+            <span class="shortcut-label">⚡ 发送时追加:</span>
             <select id="key-mapping-select">
                 <option value="none" data-keys="">无 (不追加)</option>
             </select>
         </div>
-        <button id="btn-send-mapping" aria-label="单独发送按键映射">🚀 单独发送</button>
+        <div class="shortcut-wrapper">
+            <span class="shortcut-label">🎯 单独发按键:</span>
+            <select id="single-key-mapping-select">
+                <option value="none" data-keys="">无 (不发送)</option>
+            </select>
+        </div>
     </div>
     <div id="bottom-bar">
         <button id="btn-clear" aria-label="清空输入框">🗑️</button>
@@ -631,7 +609,6 @@
             this.chatManager = chatManager;
             this.wsClient = wsClient;
             this.config = configManager;
-            this.btnSendMapping = document.getElementById('btn-send-mapping');
             this.autoMode = true;
             this.isComposing = false;
             // 设置清空按钮的 aria-label
@@ -689,54 +666,55 @@
                 this.updateModeToggleVisibility();
                 this.inputBox.focus();
             });
-            if (this.btnSendMapping) {
-                this.btnSendMapping.addEventListener('click', (e) => {
-                    if (!this.wsClient.getConnected()) return;
-                    e.preventDefault();
-                    this.sendKeyMappingOnly();
-                });
-            }
             document.addEventListener('ws-status', (e) => this.onConnectionChange(e.detail.connected));
             this.setupScrollFix();
         }
-        sendKeyMappingOnly() {
-            const select = document.getElementById('key-mapping-select');
-            const opt = select.options[select.selectedIndex];
-            const keyMappingId = opt ? opt.value : 'none';
-            const keySequence = opt ? (opt.getAttribute('data-keys') || '') : '';
-
-            if (keyMappingId === 'none' || !keySequence) {
-                return;
-            }
-
-            this.wsClient.send('send', '', {
-                key_mapping_id: keyMappingId,
-                key_sequence: keySequence
-            });
-
-            if (navigator.vibrate) navigator.vibrate(20);
-
-            const showName = opt.textContent;
-            this.chatManager.addMessage(`[模拟按键] ${showName} (${keySequence})`);
-        }
         sendCurrentMessage() {
-            const text = this.inputBox.value;
-            if (!text.trim()) return;
-
+            const rawText = this.inputBox.value;
             const select = document.getElementById('key-mapping-select');
-            const opt = select.options[select.selectedIndex];
-            const keyMappingId = opt ? opt.value : 'none';
-            const keySequence = opt ? (opt.getAttribute('data-keys') || '') : '';
+            const singleSelect = document.getElementById('single-key-mapping-select');
 
-            this.wsClient.send('send', text, {
-                key_mapping_id: keyMappingId,
-                key_sequence: keySequence
-            });
-            this.chatManager.addMessage(text);
-            this.inputBox.value = '';
-            this.adjustHeight();
-            this.wsClient.send('preview', '');
-            this.updateModeToggleVisibility();
+            if (rawText.trim() === '') {
+                // 空输入分支：触发单独模拟按键 (FR-002, FR-003)
+                const opt = singleSelect.options[singleSelect.selectedIndex];
+                const keyMappingId = opt ? opt.value : 'none';
+                const keySequence = opt ? (opt.getAttribute('data-keys') || '') : '';
+
+                if (keyMappingId === 'none' || !keySequence) {
+                    // 无按键绑定时，空发送直接进行拦截，不产生网络开销
+                    return;
+                }
+
+                this.wsClient.send('send', '', {
+                    key_mapping_id: keyMappingId,
+                    key_sequence: keySequence
+                });
+
+                if (navigator.vibrate) navigator.vibrate(20);
+
+                const showName = opt.textContent;
+                this.chatManager.addMessage(`[单独发送按键] ${showName} (${keySequence})`);
+
+                this.inputBox.value = '';
+                this.adjustHeight();
+                this.wsClient.send('preview', '');
+                this.updateModeToggleVisibility();
+            } else {
+                // 文本非空分支：正常发送文本，并携带“发送时追加”的参数
+                const opt = select.options[select.selectedIndex];
+                const keyMappingId = opt ? opt.value : 'none';
+                const keySequence = opt ? (opt.getAttribute('data-keys') || '') : '';
+
+                this.wsClient.send('send', rawText, {
+                    key_mapping_id: keyMappingId,
+                    key_sequence: keySequence
+                });
+                this.chatManager.addMessage(rawText);
+                this.inputBox.value = '';
+                this.adjustHeight();
+                this.wsClient.send('preview', '');
+                this.updateModeToggleVisibility();
+            }
         }
         sendExternalMessage(text) {
             if (!text.trim()) return;
@@ -777,6 +755,8 @@
         onConnectionChange(connected) {
             const statusBar = document.getElementById('status-bar');
             const chatListDiv = document.getElementById('chat-list');
+            const select = document.getElementById('key-mapping-select');
+            const singleSelect = document.getElementById('single-key-mapping-select');
             if (connected) {
                 statusBar.style.display = 'none';
                 chatListDiv.classList.remove('offline');
@@ -784,7 +764,8 @@
                 this.btnSend.disabled = false;
                 this.btnClear.disabled = false;
                 this.modeToggle.disabled = false;
-                if (this.btnSendMapping) this.btnSendMapping.disabled = false;
+                if (select) select.disabled = false;
+                if (singleSelect) singleSelect.disabled = false;
                 this.updateSendButtonUI();
                 this.updateModeToggleVisibility();
             } else {
@@ -795,7 +776,8 @@
                 this.btnSend.disabled = true;
                 this.btnClear.disabled = true;
                 this.modeToggle.disabled = true;
-                if (this.btnSendMapping) this.btnSendMapping.disabled = true;
+                if (select) select.disabled = true;
+                if (singleSelect) singleSelect.disabled = true;
                 this.modeToggle.style.display = 'none';
                 this.inputBox.placeholder = window.i18n.input_placeholder_disconnected;
             }
@@ -840,6 +822,7 @@
         const drawer = document.getElementById('drawer');
         const overlay = document.getElementById('drawer-overlay');
         const select = document.getElementById('key-mapping-select');
+        const singleSelect = document.getElementById('single-key-mapping-select');
         
         btnMenu.addEventListener('click', () => {
             drawer.classList.add('open');
@@ -852,6 +835,9 @@
         select.addEventListener('change', (e) => {
             localStorage.setItem('selected_key_mapping_id', e.target.value);
         });
+        singleSelect.addEventListener('change', (e) => {
+            localStorage.setItem('selected_single_key_mapping_id', e.target.value);
+        });
 
         wsClient.on('config', (data) => {
             if (data.mobile_max_records !== undefined) {
@@ -863,20 +849,36 @@
         wsClient.on('key_mappings', (data) => {
             const mappings = data.data || [];
             const savedId = localStorage.getItem('selected_key_mapping_id') || 'none';
+            const savedSingleId = localStorage.getItem('selected_single_key_mapping_id') || 'none';
             
             select.innerHTML = '<option value="none" data-keys="">无 (不追加)</option>';
+            singleSelect.innerHTML = '<option value="none" data-keys="">无 (不发送)</option>';
             
             let idExists = false;
+            let singleIdExists = false;
+            
             mappings.forEach(item => {
                 if (item.id === 'none') return;
+                
+                // 填充发送时追加下拉框
                 const opt = document.createElement('option');
                 opt.value = item.id;
                 opt.textContent = item.name;
                 opt.setAttribute('data-keys', item.keys);
                 select.appendChild(opt);
                 
+                // 填充单独发送下拉框
+                const optSingle = document.createElement('option');
+                optSingle.value = item.id;
+                optSingle.textContent = item.name;
+                optSingle.setAttribute('data-keys', item.keys);
+                singleSelect.appendChild(optSingle);
+                
                 if (item.id === savedId) {
                     idExists = true;
+                }
+                if (item.id === savedSingleId) {
+                    singleIdExists = true;
                 }
             });
             
@@ -886,12 +888,21 @@
                 select.value = 'none';
                 localStorage.setItem('selected_key_mapping_id', 'none');
             }
+
+            if (savedSingleId !== 'none' && singleIdExists) {
+                singleSelect.value = savedSingleId;
+            } else {
+                singleSelect.value = 'none';
+                localStorage.setItem('selected_single_key_mapping_id', 'none');
+            }
         });
 
         wsClient.on('warning', (data) => {
             alert(data.text);
             select.value = 'none';
             localStorage.setItem('selected_key_mapping_id', 'none');
+            singleSelect.value = 'none';
+            localStorage.setItem('selected_single_key_mapping_id', 'none');
         });
 
         wsClient.on('reload', () => {
