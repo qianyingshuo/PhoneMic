@@ -20,8 +20,8 @@
 
 **Purpose**: Project initialization and validation of environment
 
-- [ ] T001 Verify active git branch is `004-key-mappings-redesign` and working tree is ready
-- [ ] T002 Ensure project python dependencies are synced using `uv sync` or virtualenv is loaded
+- [x] T001 Verify active git branch is `004-key-mappings-redesign` and working tree is ready
+- [x] T002 Ensure project python dependencies are synced using `uv sync` or virtualenv is loaded
 
 ---
 
@@ -29,7 +29,7 @@
 
 **Purpose**: Core validation tests to ensure current baseline passes before any change
 
-- [ ] T003 Execute the baseline test suite via `pytest` to ensure 100% green before editing
+- [x] T003 Execute the baseline test suite via `pytest` to ensure 100% green before editing
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -43,14 +43,14 @@
 
 ### Tests for User Story 1 (MANDATORY - TDD Phase) ⚠️
 
-- [ ] T004 [US1] Write a failing test in tests/test_backend.py that asserts `mobile.html` stores `selected_key_mapping_id` to LocalStorage and applies it on send only when input is not empty
+- [x] T004 [US1] Write a failing test in tests/test_backend.py that asserts `mobile.html` stores `selected_key_mapping_id` to LocalStorage and applies it on send only when input is not empty
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Remove deprecated label and styling blocks from the HTML body in phonemic/resources/mobile.html
-- [ ] T006 [US1] Relocate `#key-mapping-select` to the newly structured `#shortcut-bar` in phonemic/resources/mobile.html
-- [ ] T007 [US1] Update the JS select change listener to save selection to LocalStorage key `selected_key_mapping_id` in phonemic/resources/mobile.html
-- [ ] T008 [US1] Update JS `sendCurrentMessage` to fetch and apply selection to WebSocket message payload only when textbox has content in phonemic/resources/mobile.html
+- [x] T005 [US1] Remove deprecated label and styling blocks from the HTML body in phonemic/resources/mobile.html
+- [x] T006 [US1] Relocate `#key-mapping-select` to the newly structured `#shortcut-bar` in phonemic/resources/mobile.html
+- [x] T007 [US1] Update the JS select change listener to save selection to LocalStorage key `selected_key_mapping_id` in phonemic/resources/mobile.html
+- [x] T008 [US1] Update JS `sendCurrentMessage` to fetch and apply selection to WebSocket message payload only when textbox has content in phonemic/resources/mobile.html
 
 **Checkpoint**: User Story 1 is functional and testable independently.
 
@@ -64,16 +64,16 @@
 
 ### Tests for User Story 2 (MANDATORY - TDD Phase) ⚠️
 
-- [ ] T009 [US2] Write a failing test in tests/test_backend.py that asserts `mobile.html` defines `single-key-mapping-select`, implements empty-textbox logic routing, and caches `selected_single_key_mapping_id`
+- [x] T009 [US2] Write a failing test in tests/test_backend.py that asserts `mobile.html` defines `single-key-mapping-select`, implements empty-textbox logic routing, and caches `selected_single_key_mapping_id`
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Add the `#single-key-mapping-select` dropdown structure to the `#shortcut-bar` in phonemic/resources/mobile.html
-- [ ] T011 [US2] Bind select change listener to save selection to LocalStorage key `selected_single_key_mapping_id` in phonemic/resources/mobile.html
-- [ ] T012 [US2] Restore state on page load by reading `selected_single_key_mapping_id` in phonemic/resources/mobile.html
-- [ ] T013 [US2] Modify JS `sendCurrentMessage` to check if input is empty, and route to `sendKeyMappingOnly` using `#single-key-mapping-select` value in phonemic/resources/mobile.html
-- [ ] T014 [US2] Implement chatManager echo format in `sendKeyMappingOnly` method in phonemic/resources/mobile.html
-- [ ] T015 [US2] Add disabled/enabled connection transition logic to `#single-key-mapping-select` in phonemic/resources/mobile.html
+- [x] T010 [US2] Add the `#single-key-mapping-select` dropdown structure to the `#shortcut-bar` in phonemic/resources/mobile.html
+- [x] T011 [US2] Bind select change listener to save selection to LocalStorage key `selected_single_key_mapping_id` in phonemic/resources/mobile.html
+- [x] T012 [US2] Restore state on page load by reading `selected_single_key_mapping_id` in phonemic/resources/mobile.html
+- [x] T013 [US2] Modify JS `sendCurrentMessage` to check if input is empty, and route to `sendKeyMappingOnly` using `#single-key-mapping-select` value in phonemic/resources/mobile.html
+- [x] T014 [US2] Implement chatManager echo format in `sendKeyMappingOnly` method in phonemic/resources/mobile.html
+- [x] T015 [US2] Add disabled/enabled connection transition logic to `#single-key-mapping-select` in phonemic/resources/mobile.html
 
 **Checkpoint**: User Stories 1 and 2 are both independently functional and testable.
 
@@ -87,12 +87,12 @@
 
 ### Tests for User Story 3 (MANDATORY - TDD Phase) ⚠️
 
-- [ ] T016 [US3] Write a failing test in tests/test_backend.py that asserts `btn-send-mapping` elements are completely absent from `mobile.html`
+- [x] T016 [US3] Write a failing test in tests/test_backend.py that asserts `btn-send-mapping` elements are completely absent from `mobile.html`
 
 ### Implementation for User Story 3
 
-- [ ] T017 [US3] Remove `#btn-send-mapping` element and its click listener bindings in phonemic/resources/mobile.html
-- [ ] T018 [US3] Restructure CSS styling classes of `#shortcut-bar` and select boxes to align beautifully in phonemic/resources/mobile.html
+- [x] T017 [US3] Remove `#btn-send-mapping` element and its click listener bindings in phonemic/resources/mobile.html
+- [x] T018 [US3] Restructure CSS styling classes of `#shortcut-bar` and select boxes to align beautifully in phonemic/resources/mobile.html
 
 ---
 
@@ -100,10 +100,10 @@
 
 **Purpose**: Polish CSS styling, update i18n variables, run quickstart validation, and produce final walkthrough.
 
-- [ ] T019 Update French/English translation strings if needed in phonemic/resources/locales/
-- [ ] T020 Run `render_preview.py` and inspect layout alignment in browser
-- [ ] T021 Execute full pytest suite to verify all unit tests pass
-- [ ] T022 Perform manual scenarios validation per quickstart.md and generate walkthrough.md
+- [x] T019 Update French/English translation strings if needed in phonemic/resources/locales/
+- [x] T020 Run `render_preview.py` and inspect layout alignment in browser
+- [x] T021 Execute full pytest suite to verify all unit tests pass
+- [x] T022 Perform manual scenarios validation per quickstart.md and generate walkthrough.md
 
 ---
 
